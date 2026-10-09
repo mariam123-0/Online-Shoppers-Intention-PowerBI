@@ -1,15 +1,7 @@
 # 🛒 E-Commerce Conversion Dashboard
 
-> An interactive **Power BI** dashboard that explains what turns a website visitor into a buyer, built on 12,330 real e-commerce sessions.
+An interactive **Power BI** dashboard to answer that question using 12,330 e-commerce sessions (UCI Online Shoppers Purchasing Intention dataset), where roughly 15.5% of sessions ended in a purchase.
 
-![Power BI](https://img.shields.io/badge/Power%20BI-Desktop-F2C811?logo=powerbi&logoColor=black)
-![DAX](https://img.shields.io/badge/DAX-Measures%20%26%20Columns-A855F7)
-![Power Query](https://img.shields.io/badge/Power%20Query-M-6D28D9)
-![Status](https://img.shields.io/badge/Status-Complete-34D399)
-
-**🔗 Live dashboard:** `[PASTE YOUR PUBLISH-TO-WEB LINK HERE]`
-
-![Executive Overview](screenshots/page1_overview.png)
 
 ---
 
@@ -25,10 +17,7 @@
 8. [Design System](#-design-system)
 9. [Interactivity](#-interactivity)
 10. [Repository Structure](#-repository-structure)
-11. [How to Run](#-how-to-run)
-12. [Limitations & Next Steps](#-limitations--next-steps)
-13. [Dataset Citation](#-dataset-citation)
-14. [Author](#-author)
+11. [Dataset Citation](#-dataset-citation)
 
 ---
 
@@ -87,14 +76,14 @@ The result is a 3-page, dark-themed dashboard that moves from the big picture (K
 ## 🖥 Dashboard Pages
 
 ### 1️⃣ Executive Overview
-![Page 1](screenshots/page1_overview.png)
+![image alter](https://github.com/mariam123-0/Online-Shoppers-Intention-PowerBI/blob/f1332c75c2fde855640af202e5f2a8124b6834f3/design/screenshots/Overview.png)
 
 - **KPI cards:** Sessions · Purchases · Conversion Rate · Avg Page Value
 - **Monthly Conversion Rate:** smoothed area chart
 - **Conversion by Visitor Type** and **by Weekend:** pill-style bars
 
 ### 2️⃣ Customer Behavior
-![Page 2](screenshots/page2_behavior.png)
+![image alter]([screenshots/page2_behavior.png](https://github.com/mariam123-0/Online-Shoppers-Intention-PowerBI/blob/f1332c75c2fde855640af202e5f2a8124b6834f3/design/screenshots/Behavior.png))
 
 - **3 range sliders:** Product duration · Bounce rate · Page values
 - **6 binned charts:** Visitor Type, Product Pages, Product Duration, Bounce Rate, Exit Rate, Page Values, each against conversion rate
@@ -102,7 +91,7 @@ The result is a 3-page, dark-themed dashboard that moves from the big picture (K
 Raw numbers are **grouped into bins** (for example `0–10`, `11–20`, `21–30`, `31+` product pages) so the relationship with conversion is readable.
 
 ### 3️⃣ Traffic Analysis
-![Page 3](screenshots/page3_traffic.png)
+![image alter](https://github.com/mariam123-0/Online-Shoppers-Intention-PowerBI/blob/f1332c75c2fde855640af202e5f2a8124b6834f3/design/screenshots/Traffic.png)
 
 - **Visitor type tile slicer** (All / Returning / New / Other)
 - **6 charts:** Traffic Type (Top 6), Region, Browser (Top 6), Operating System (Top 5), Month, Weekend
@@ -277,42 +266,12 @@ Shoppers-Conversion-Dashboard/
 │   ├── page2_customer_behavior_1280x720.png
 │   └── page3_traffic_1280x720.png
 └── screenshots/                            ← screenshots of the final report
-    ├── page1_overview.png
-    ├── page2_behavior.png
-    └── page3_traffic.png
+    ├── overview.png
+    ├── behavior.png
+    └── traffic.png
 ```
 
----
-
-## ▶️ How to Run
-
-1. Install **Power BI Desktop** (free).
-2. Clone the repo:
-   ```bash
-   git clone https://github.com/<your-username>/Shoppers-Conversion-Dashboard.git
-   ```
-3. Open `Shoppers_Conversion_Dashboard.pbix`.
-4. If prompted, point the data source to `data/online_shoppers_intention.csv`
-   (*Home → Transform data → Data source settings*).
-5. Click **Refresh**.
-
-**Rebuild from scratch:** load the CSV with `powerquery/transform.m`, import the theme, then create the columns and measures from `dax/dax_reference.dax` one at a time.
-
----
-
-## ⚠️ Limitations & Next Steps
-
-**Limitations**
-- Single-year, static dataset with no Jan or Apr sessions, so seasonality is partial.
-- Conversion rates on categories with few sessions can be unstable (always read them next to Sessions).
-- The analysis shows **association, not causation**.
-
-**Next steps**
-- Add a predictive layer (for example logistic regression) for purchase probability.
-- Add a customer-segment view (RFM-style clustering).
-- Add statistical significance checks for category differences.
-
----
+--
 
 ## 📚 Dataset Citation
 
@@ -321,9 +280,5 @@ Dataset: [UCI Machine Learning Repository, Online Shoppers Purchasing Intention 
 
 ---
 
-## 👤 Author
-
-**`[Your Name]`**
-📧 `[email]` · 💼 [LinkedIn](`[link]`) · 🐙 [GitHub](`[link]`)
 
 *If you found this project useful, a ⭐ on the repo is appreciated.*
