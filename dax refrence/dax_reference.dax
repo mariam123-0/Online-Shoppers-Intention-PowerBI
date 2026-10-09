@@ -1,0 +1,320 @@
+// =============================================================================
+//  Shoppers Conversion Dashboard | DAX reference
+//  Dataset : UCI Online Shoppers Purchasing Intention
+//  Table   : Shoppers   (rename the imported query "online_shoppers_intention"
+//                        to "Shoppers" so every formula below works as-is)
+//
+//  HOW TO USE
+//    - Items marked [COLUMN]  -> Table tools > New column   (one at a time)
+//    - Items marked [MEASURE] -> Home > New measure          (one at a time)
+//    - Paste ONE formula per New column / New measure. Never paste two together.
+// =============================================================================
+
+
+// =============================================================================
+//  PART 1 | CALCULATED COLUMNS
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// [COLUMN] Month Num
+// Numeric month used to sort the text column [Month] chronologically.
+// Afterwards: select [Month] > Column tools > Sort by column > Month Num
+// (The dataset has no Jan or Apr, and uses "June" instead of "Jun".)
+// -----------------------------------------------------------------------------
+Month Num =
+SWITCH (
+    TRUE (),
+    Shoppers[Month] = "Jan", 1,
+    Shoppers[Month] = "Feb", 2,
+    Shoppers[Month] = "Mar", 3,
+    Shoppers[Month] = "Apr", 4,
+    Shoppers[Month] = "May", 5,
+    Shoppers[Month] IN { "Jun", "June" }, 6,
+    Shoppers[Month] = "Jul", 7,
+    Shoppers[Month] = "Aug", 8,
+    Shoppers[Month] = "Sep", 9,
+    Shoppers[Month] = "Oct", 10,
+    Shoppers[Month] = "Nov", 11,
+    Shoppers[Month] = "Dec", 12
+)
+
+// -----------------------------------------------------------------------------
+// [COLUMN] Weekend Label
+// Readable label for the boolean [Weekend] column.
+// -----------------------------------------------------------------------------
+Weekend Label =
+IF ( Shoppers[Weekend] = TRUE (), "Weekend", "Weekday" )
+
+
+// -----------------------------------------------------------------------------
+// BINS | Page 2 (Customer Behavior)
+// Each bin has a label column and an order column.
+// Afterwards: select the label column > Column tools > Sort by column > its Order column
+// Then hide every "... Order" column (right-click > Hide in report view).
+// -----------------------------------------------------------------------------
+
+// [COLUMN] Pages Bin
+Pages Bin =
+SWITCH (
+    TRUE (),
+    Shoppers[ProductRelated] <= 10, "0–10",
+    Shoppers[ProductRelated] <= 20, "11–20",
+    Shoppers[ProductRelated] <= 30, "21–30",
+    "31+"
+)
+
+// [COLUMN] Pages Bin Order
+Pages Bin Order =
+SWITCH (
+    TRUE (),
+    Shoppers[ProductRelated] <= 10, 1,
+    Shoppers[ProductRelated] <= 20, 2,
+    Shoppers[ProductRelated] <= 30, 3,
+    4
+)
+
+// [COLUMN] Duration Bin  (ProductRelated_Duration is in seconds)
+Duration Bin =
+SWITCH (
+    TRUE (),
+    Shoppers[ProductRelated_Duration] <= 100, "≤100s",
+    Shoppers[ProductRelated_Duration] <= 500, "≤500s",
+    Shoppers[ProductRelated_Duration] <= 1500, "≤1500s",
+    "1500s+"
+)
+
+// [COLUMN] Duration Bin Order
+Duration Bin Order =
+SWITCH (
+    TRUE (),
+    Shoppers[ProductRelated_Duration] <= 100, 1,
+    Shoppers[ProductRelated_Duration] <= 500, 2,
+    Shoppers[ProductRelated_Duration] <= 1500, 3,
+    4
+)
+
+// [COLUMN] Bounce Bin  (BounceRates is stored as a fraction: 0.02 = 2%)
+Bounce Bin =
+SWITCH (
+    TRUE (),
+    Shoppers[BounceRates] = 0, "0%",
+    Shoppers[BounceRates] <= 0.01, "0–1%",
+    Shoppers[BounceRates] <= 0.05, "1–5%",
+    "5%+"
+)
+
+// [COLUMN] Bounce Bin Order
+Bounce Bin Order =
+SWITCH (
+    TRUE (),
+    Shoppers[BounceRates] = 0, 1,
+    Shoppers[BounceRates] <= 0.01, 2,
+    Shoppers[BounceRates] <= 0.05, 3,
+    4
+)
+
+// [COLUMN] Exit Bin
+Exit Bin =
+SWITCH (
+    TRUE (),
+    Shoppers[ExitRates] <= 0.02, "0–2%",
+    Shoppers[ExitRates] <= 0.05, "2–5%",
+    Shoppers[ExitRates] <= 0.10, "5–10%",
+    "10%+"
+)
+
+// [COLUMN] Exit Bin Order
+Exit Bin Order =
+SWITCH (
+    TRUE (),
+    Shoppers[ExitRates] <= 0.02, 1,
+    Shoppers[ExitRates] <= 0.05, 2,
+    Shoppers[ExitRates] <= 0.10, 3,
+    4
+)
+
+// [COLUMN] PageValue Bin
+PageValue Bin =
+SWITCH (
+    TRUE (),
+    Shoppers[PageValues] = 0, "0",
+    Shoppers[PageValues] <= 10, "0–10",
+    Shoppers[PageValues] <= 50, "10–50",
+    "50+"
+)
+
+// [COLUMN] PageValue Bin Order
+PageValue Bin Order =
+SWITCH (
+    TRUE (),
+    Shoppers[PageValues] = 0, 1,
+    Shoppers[PageValues] <= 10, 2,
+    Shoppers[PageValues] <= 50, 3,
+    4
+)
+
+// -----------------------------------------------------------------------------
+// [COLUMN] Duration Capped
+// Used ONLY by the "Product duration" slider on Page 2.
+// The raw maximum is ~63,974 s, which makes a slider unusable because almost
+// all sessions sit below ~3,000 s. Sessions above the cap are counted AT the cap.
+// -----------------------------------------------------------------------------
+Duration Capped =
+MIN ( Shoppers[ProductRelated_Duration], 3000 )
+
+
+// =============================================================================
+//  PART 2 | MEASURES
+//  Recommended: store them in a dedicated table (Home > Enter data > "_Measures")
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// CORE KPIs
+// Each row of the dataset is one session.
+// Formats: Sessions / Purchases -> #,0 | Conversion Rate -> 0.0% | Avg Page Value -> 0.00
+// -----------------------------------------------------------------------------
+
+// [MEASURE] Sessions
+Sessions =
+COUNTROWS ( Shoppers )
+
+// [MEASURE] Purchases
+Purchases =
+CALCULATE ( COUNTROWS ( Shoppers ), Shoppers[Revenue] = TRUE () )
+
+// [MEASURE] Conversion Rate
+Conversion Rate =
+DIVIDE ( [Purchases], [Sessions] )
+
+// [MEASURE] Avg Page Value
+Avg Page Value =
+AVERAGE ( Shoppers[PageValues] )
+
+
+// -----------------------------------------------------------------------------
+// [MEASURE] Track
+// Constant used to draw the grey "track" behind the pill-shaped bars.
+// Put it in the X-axis BEFORE [Conversion Rate], set overlap to maximum, and set
+// the axis maximum to the same value. Raise it if any rate exceeds 30%.
+// -----------------------------------------------------------------------------
+Track =
+0.30
+
+
+// -----------------------------------------------------------------------------
+// DYNAMIC HIGHLIGHT COLORS (pink on the highest bar)
+// Apply in each chart: Columns > Colors > fx > Format style: Field value >
+// Based on field: the matching measure below.
+// Note: on charts with a Top N filter the global maximum may fall outside the
+// visible categories, so the pink bar may not appear. Color that bar manually.
+// -----------------------------------------------------------------------------
+
+// [MEASURE] Color TrafficType
+Color TrafficType =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[TrafficType] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color Region
+Color Region =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[Region] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color Browser
+Color Browser =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[Browser] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color OS
+Color OS =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[OperatingSystems] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color Month
+Color Month =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[Month] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color Weekend
+Color Weekend =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[Weekend Label] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+// [MEASURE] Color Visitor Type
+Color Visitor Type =
+IF (
+    [Conversion Rate]
+        = MAXX ( ALLSELECTED ( Shoppers[VisitorType] ), [Conversion Rate] ),
+    "#E879F9",
+    "#A855F7"
+)
+
+
+// =============================================================================
+//  PART 3 | OPTIONAL: bins as a MEASURE (disconnected table pattern)
+//  Not used in the report. Kept as a reference because a bin label cannot be
+//  a measure: chart axes need a COLUMN. This pattern builds a separate lookup
+//  table and computes the rate per bin inside a measure.
+// =============================================================================
+
+// [NEW TABLE] Modeling > New table. Do NOT create a relationship.
+Pages Bins =
+DATATABLE (
+    "Bin", STRING,
+    "Min", INTEGER,
+    "Max", INTEGER,
+    "Order", INTEGER,
+    {
+        { "0–10", 0, 10, 1 },
+        { "11–20", 11, 20, 2 },
+        { "21–30", 21, 30, 3 },
+        { "31+", 31, 999999, 4 }
+    }
+)
+
+// [MEASURE] Conversion Rate by Pages Bin
+Conversion Rate by Pages Bin =
+VAR MinV = MIN ( 'Pages Bins'[Min] )
+VAR MaxV = MAX ( 'Pages Bins'[Max] )
+VAR SessionsInBin =
+    CALCULATE (
+        COUNTROWS ( Shoppers ),
+        FILTER (
+            Shoppers,
+            Shoppers[ProductRelated] >= MinV && Shoppers[ProductRelated] <= MaxV
+        )
+    )
+VAR PurchasesInBin =
+    CALCULATE (
+        COUNTROWS ( Shoppers ),
+        Shoppers[Revenue] = TRUE (),
+        FILTER (
+            Shoppers,
+            Shoppers[ProductRelated] >= MinV && Shoppers[ProductRelated] <= MaxV
+        )
+    )
+RETURN
+    DIVIDE ( PurchasesInBin, SessionsInBin )
