@@ -83,7 +83,7 @@ The result is a 3-page, dark-themed dashboard that moves from the big picture (K
 - **Conversion by Visitor Type** and **by Weekend:** pill-style bars
 
 ### 2️⃣ Customer Behavior
-![image alter](https://github.com/mariam123-0/Online-Shoppers-Intention-PowerBI/blob/655affd27fe075c2817c5775ba5653e28055b8d4/design/screenshots/Behavior.png)
+![image alter](https://github.com/mariam123-0/Online-Shoppers-Intention-PowerBI/blob/1e98b88538e8653bf73175aa3788e5b15526d6ef/design/screenshots/Behavior.png)
 
 - **3 range sliders:** Product duration · Bounce rate · Page values
 - **6 binned charts:** Visitor Type, Product Pages, Product Duration, Bounce Rate, Exit Rate, Page Values, each against conversion rate
